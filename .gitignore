@@ -7,3 +7,4 @@ node_modules/
 themes/.active
 .env
 src/desktop/mainPlugins.generated.ts
+src/plugins/LiquidGlass/native/*.node

@@ -14,6 +14,7 @@ import {
   setupPluginRpc,
   updateSettings,
   windowCreated,
+  windowOptionsFor,
   interceptAccountSignIn,
   accountNavigation,
 } from './pluginHost.js';
@@ -199,7 +200,7 @@ function startSlack(asar: string) {
   if (stored) updateSettings(stored);
   bootMainPlugins();
 
-  applyPatches(asar, path.join(__dirname, 'preload.js'), slickResourcesPath, windowCreated, interceptAccountSignIn);
+  applyPatches(asar, path.join(__dirname, 'preload.js'), slickResourcesPath, windowCreated, interceptAccountSignIn, windowOptionsFor);
   setupBridge();
   setupPluginRpc();
 

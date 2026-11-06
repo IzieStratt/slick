@@ -418,6 +418,21 @@ export async function readyMainPlugins() {
   await Promise.all([...registered.values()].map((entry) => reconcile(entry)));
 }
 
+/** Window options from every enabled plugin, read when a window is created, so they must come from settings. */
+export function windowOptionsFor(): Partial<Electron.BrowserWindowConstructorOptions> {
+  if (safeMode()) return {};
+  let options: Partial<Electron.BrowserWindowConstructorOptions> = {};
+  for (const [id, entry] of registered) {
+    if (!isActive(entry) || !entry.plugin.windowOptions) continue;
+    try {
+      options = { ...options, ...entry.plugin.windowOptions(entry.ctx) };
+    } catch (error) {
+      console.error(`[slick] ${id} window options failed:`, error);
+    }
+  }
+  return options;
+}
+
 export function windowCreated(window: Electron.BrowserWindow) {
   if (safeMode()) return;
   for (const [id, entry] of registered) {

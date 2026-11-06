@@ -145,6 +145,9 @@ export interface SlickMainPlugin {
   /** Per Slack BrowserWindow. */
   window?(ctx: MainCtx, window: Electron.BrowserWindow): void;
 
+  /** Merged into each Slack BrowserWindow's options before it is created, for options only set at creation. */
+  windowOptions?(ctx: MainCtx): Partial<Electron.BrowserWindowConstructorOptions> | void;
+
   /** Renderer-callable; the dispatcher only accepts own properties. */
   rpc?: Record<string, RpcHandler>;
 }

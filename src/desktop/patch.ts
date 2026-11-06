@@ -109,6 +109,7 @@ export function applyPatches(
   slickResources: string,
   onWindow?: (window: Electron.BrowserWindow) => void,
   onSignIn?: (contents: Electron.WebContents, url: string) => boolean,
+  windowOptions?: () => Partial<Electron.BrowserWindowConstructorOptions>,
 ) {
   const slackResources = path.dirname(slackAsarPath);
   const tray = trayDir(slickResources);
@@ -182,7 +183,7 @@ export function applyPatches(
   overrides.BrowserWindow = new Proxy(OrigBrowserWindow, {
     construct(Target: any, [opts = {}]: any[]) {
       const { webPreferences, preloadKey } = substitutePreload(opts.webPreferences);
-      const window = new Target({ ...opts, webPreferences });
+      const window = new Target({ ...opts, ...windowOptions?.(), webPreferences });
       if (preloadKey) window.once('closed', () => originalPreloads.delete(preloadKey));
       try {
         onWindow?.(window);
