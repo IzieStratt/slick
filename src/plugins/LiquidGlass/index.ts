@@ -414,7 +414,11 @@ export default class LiquidGlass extends SlickPlugin<typeof meta.settings> {
   private pending = new Set<Element>()
   /** elements whose class changed, looked at again by themselves */
   private reclassify = new Set<Element>()
+  /** elements that were hidden when looked at, looked at again for a while after they show */
+  private deferred = new Map<Element, number>()
+  private deferredTimer = 0
   private cleared = new Set<Element>()
+  private retries = new WeakMap<Element, number>()
   private nextId = 1
   private frame = 0
   private scanTimer = 0
@@ -549,6 +553,8 @@ export default class LiquidGlass extends SlickPlugin<typeof meta.settings> {
     cancelAnimationFrame(this.frame)
     clearTimeout(this.scanTimer)
     clearTimeout(this.scrollTimer)
+    clearTimeout(this.deferredTimer)
+    this.deferred.clear()
     for (const dispose of this.disposers.splice(0)) dispose()
     this.resizeObserver?.disconnect()
     for (const el of this.ids.keys()) el.removeAttribute(MARK)
@@ -714,6 +720,13 @@ export default class LiquidGlass extends SlickPlugin<typeof meta.settings> {
       added.push(el)
     }
     this.reclassify.clear()
+    for (const [el, tries] of this.deferred) {
+      this.deferred.delete(el)
+      if (!el.isConnected || this.ids.has(el)) continue
+      this.checked.delete(el)
+      added.push(el)
+      this.retries.set(el, tries)
+    }
 
     for (const el of this.ids.keys()) {
       if (el.isConnected) continue
@@ -731,6 +744,10 @@ export default class LiquidGlass extends SlickPlugin<typeof meta.settings> {
         : this.config.everything
           ? this.classify(el)
           : null
+      if (kind === null && !this.isShown(el)) {
+        const tries = this.retries.get(el) ?? 0
+        if (tries < 20) this.deferred.set(el, tries + 1)
+      }
       if (kind === 'glass') {
         this.ids.set(el, this.nextId++)
         this.resizeObserver?.observe(el)
@@ -742,6 +759,12 @@ export default class LiquidGlass extends SlickPlugin<typeof meta.settings> {
     this.sampleColors()
     this.mark()
     this.schedule()
+    if (this.deferred.size && !this.deferredTimer) {
+      this.deferredTimer = window.setTimeout(() => {
+        this.deferredTimer = 0
+        this.queueScan()
+      }, 700)
+    }
 
     // Slack's layout mounts in stages, so look again until the core surfaces exist
     if (!CORE.every((selector) => document.querySelector(selector))) {
@@ -784,6 +807,12 @@ export default class LiquidGlass extends SlickPlugin<typeof meta.settings> {
    * message cards) or too small (scrollbar thumbs), and ones that only draw a shadow, are made
    * transparent instead, so nothing of the page's own is left painted behind the glass.
    */
+  /** false for things hidden right now, which are looked at again later */
+  private isShown(el: Element): boolean {
+    const visible = el as Element & { checkVisibility?: (options?: object) => boolean }
+    return !visible.checkVisibility || visible.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true, visibilityProperty: true })
+  }
+
   private classify(el: Element): 'glass' | 'clear' | null {
     if (el === document.body || el === document.documentElement) return null
     // hidden things (shortcut hints, closed menus) can still have a background, and as glass they would show
