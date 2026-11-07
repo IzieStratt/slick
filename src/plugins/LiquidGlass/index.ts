@@ -574,7 +574,13 @@ export default class LiquidGlass extends SlickPlugin<typeof meta.settings> {
       .filter(Boolean)
   }
 
+  /** the last shapes sent, so an unchanged frame costs nothing in the native layer */
+  private lastGlass = ''
+
   private setGlass(shapes: GlassShape[] | null, options?: GlassOptions) {
+    const key = JSON.stringify([shapes, options ?? null])
+    if (key === this.lastGlass) return
+    this.lastGlass = key
     void this.api.main.call('set', [shapes, options ?? {}]).catch(() => {})
   }
 

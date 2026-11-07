@@ -47,14 +47,14 @@ export const settings = {
   panes: {
     type: 'boolean',
     label: 'Glass panes',
-    description: 'Also make the big panes (sidebar, rail, main view, top bar) glass',
-    default: true,
+    description: 'Also make the big panes (sidebar, rail, main view, top bar) glass. Costs a lot of GPU',
+    default: false,
   },
   refract: {
     type: 'boolean',
     label: 'Glass over the page',
     description: 'Put small elements over the page so the glass bends the Slack content under it',
-    default: true,
+    default: false,
   },
   aboveSelectors: {
     type: 'text',
