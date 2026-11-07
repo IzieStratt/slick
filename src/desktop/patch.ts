@@ -226,7 +226,7 @@ export function applyPatches(
         }
         return {
           ...result,
-          overrideBrowserWindowOptions: { ...result.overrideBrowserWindowOptions, webPreferences },
+          overrideBrowserWindowOptions: { ...result.overrideBrowserWindowOptions, ...windowOptions?.(), webPreferences },
         };
       });
   });

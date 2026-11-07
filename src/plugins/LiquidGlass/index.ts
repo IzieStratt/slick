@@ -52,7 +52,7 @@ const CLEAR = 'data-taut-liquid-glass-clear'
 /** an element with a background at least this opaque becomes glass when `everything` is on */
 const MIN_ALPHA = 0.03
 const MIN_SIZE = 12
-const MAX_ELEMENTS = 160
+const MAX_ELEMENTS = 1000
 
 /** anything bigger than this stays under the page, big sheets of blur over the content are unusable */
 const MAX_ABOVE_AREA = 40000
