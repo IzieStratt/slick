@@ -10,7 +10,7 @@ export const settings = {
     type: 'number',
     label: 'Glass opacity',
     description: 'How opaque the glass background is, from 0 (clear glass) to 1 (the element’s own solid color)',
-    default: 0.15,
+    default: 0.05,
     min: 0,
     max: 1,
   },
